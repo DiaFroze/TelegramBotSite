@@ -1,109 +1,210 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Froze Kino – Register</title>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js"></script>
-
+  <title>Froze Kino</title>
   <style>
     body {
-      background-color: #111;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
       margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0d0d0d;
+      color: white;
     }
 
-    #registerForm {
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      background: #141414;
+      position: relative;
+    }
+
+    .left-side {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .logo {
+      font-size: 26px;
+      font-weight: bold;
+      color: #ff3c3c;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .logo:hover {
+      color: #ff6666;
+    }
+
+    .search-box {
+      background: #1f1f1f;
+      padding: 8px 15px;
+      border-radius: 25px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 0 4px rgba(0,0,0,0.5);
+    }
+
+    .search-box input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: white;
+      width: 150px;
+      padding: 5px;
+    }
+
+    .search-box input::placeholder {
+      color: #888;
+    }
+
+    .profile {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #444;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .dropdown {
+      position: absolute;
+      top: 70px;
+      right: 40px;
       background: #222;
+      border: 1px solid #333;
+      border-radius: 8px;
+      display: none;
+      flex-direction: column;
+      z-index: 10;
+    }
+
+    .dropdown button {
+      background: none;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .dropdown button:hover {
+      background: #333;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9;
+    }
+
+    .form-box {
+      background: #1c1c1c;
       padding: 30px;
       border-radius: 12px;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
       width: 300px;
     }
 
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border-radius: 8px;
-      border: none;
-      outline: none;
+    .form-box h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: #fff;
     }
 
-    button {
+    .form-box input {
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      background: #2a2a2a;
+      color: white;
+    }
+
+    .form-box button {
       width: 100%;
       padding: 10px;
-      background-color: #ff5722;
+      background: #ff3c3c;
       border: none;
-      border-radius: 8px;
       color: white;
       font-weight: bold;
+      border-radius: 6px;
       cursor: pointer;
     }
 
-    button:hover {
-      background-color: #e64a19;
-    }
-
-    #registerStatus {
-      margin-top: 10px;
-      font-size: 0.9em;
-      color: #aaa;
+    .form-box button:hover {
+      background: #e53939;
     }
   </style>
+</head>
+<body>
+  <header>
+    <div class="left-side">
+      <div class="logo" onclick="location.reload()">Froze Kino</div>
+      <div class="search-box">
+        <input type="text" placeholder="Поиск фильмов..." />
+      </div>
+    </div>
+    <div class="profile" onclick="toggleDropdown()">
+      <div class="dropdown" id="profileDropdown">
+        <button onclick="showForm('register')">Зарегистрироваться</button>
+        <button onclick="showForm('login')">Войти</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="overlay" id="overlay">
+    <div class="form-box" id="formBox">
+      <!-- Форма появится через JS -->
+    </div>
+  </div>
 
   <script>
-    // Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyC84hJqdAk8TDRxRWbv8pC9sqJ4OdsXzrU",
-      authDomain: "frozekino.firebaseapp.com",
-      projectId: "frozekino",
-      storageBucket: "frozekino.appspot.com",
-      messagingSenderId: "623641197890",
-      appId: "1:623641197890:web:6675b451e5c05a69319cdb",
-      measurementId: "G-8NPR6RLHFZ"
-    };
-
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-
-    function register() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-
-      auth.createUserWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-          const user = userCredential.user;
-          user.sendEmailVerification().then(() => {
-            document.getElementById("registerStatus").innerText =
-              "✅ Проверка отправлена. Проверь email!";
-          });
-        })
-        .catch((error) => {
-          document.getElementById("registerStatus").innerText =
-            "❌ Ошибка: " + error.message;
-        });
+    function toggleDropdown() {
+      const dropdown = document.getElementById("profileDropdown");
+      dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
     }
-  </script>
-</head>
 
-<body>
-  <div id="registerForm">
-    <h2 style="text-align: center;">Регистрация</h2>
-    <input type="text" id="username" placeholder="Имя пользователя (пока не сохраняется)" />
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="password" placeholder="Пароль" />
-    <button onclick="register()">Зарегистрироваться</button>
-    <p id="registerStatus"></p>
-  </div>
+    function showForm(type) {
+      const overlay = document.getElementById("overlay");
+      const formBox = document.getElementById("formBox");
+      let formHTML = "";
+
+      if (type === "register") {
+        formHTML = `
+          <h2>Регистрация</h2>
+          <input type="text" placeholder="Логин" />
+          <input type="email" placeholder="Email" />
+          <input type="password" placeholder="Пароль" />
+          <button>Зарегистрироваться</button>
+        `;
+      } else if (type === "login") {
+        formHTML = `
+          <h2>Вход</h2>
+          <input type="text" placeholder="Логин" />
+          <input type="password" placeholder="Пароль" />
+          <button>Войти</button>
+        `;
+      }
+
+      formBox.innerHTML = formHTML;
+      overlay.style.display = "flex";
+      document.getElementById("profileDropdown").style.display = "none";
+    }
+
+    document.getElementById("overlay").addEventListener("click", function (e) {
+      if (e.target.id === "overlay") {
+        this.style.display = "none";
+      }
+    });
+  </script>
 </body>
 </html>
