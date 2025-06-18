@@ -1,83 +1,64 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Froze Kino</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Froze Kino – Register</title>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js"></script>
+
   <style>
     body {
-      margin: 0;
-      background-color: #000;
-      color: white;
+      background-color: #111;
+      color: #fff;
       font-family: Arial, sans-serif;
-    }
-
-    .header {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem;
-      background: #111;
-    }
-
-    .logo {
-      font-size: 1.4rem;
-      font-weight: bold;
-    }
-
-    .profile {
-      position: relative;
-      cursor: pointer;
-    }
-
-    .profile-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: #555;
-      display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
     }
 
-    .dropdown {
-      position: absolute;
-      top: 50px;
-      right: 0;
+    #registerForm {
       background: #222;
-      border-radius: 5px;
-      overflow: hidden;
-      display: none;
-      flex-direction: column;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+      width: 300px;
     }
 
-    .dropdown button {
-      background: none;
-      color: white;
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 8px;
       border: none;
-      padding: 10px 20px;
-      text-align: left;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #ff5722;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
       cursor: pointer;
     }
 
-    .dropdown button:hover {
-      background: #333;
+    button:hover {
+      background-color: #e64a19;
+    }
+
+    #registerStatus {
+      margin-top: 10px;
+      font-size: 0.9em;
+      color: #aaa;
     }
   </style>
-</head>
-<body>
-  <div class="header">
-    <div class="logo">froze kino</div>
-    <div class="profile" onclick="toggleDropdown()">
-      <div class="profile-icon">👤</div>
-      <div class="dropdown" id="dropdown">
-        <button onclick="signIn()">Войти</button>
-        <button onclick="signIn()">Зарегистрироваться</button>
-      </div>
-    </div>
-  </div>
 
   <script>
     // Firebase config
@@ -85,37 +66,44 @@
       apiKey: "AIzaSyC84hJqdAk8TDRxRWbv8pC9sqJ4OdsXzrU",
       authDomain: "frozekino.firebaseapp.com",
       projectId: "frozekino",
-      storageBucket: "frozekino.firebasestorage.app",
+      storageBucket: "frozekino.appspot.com",
       messagingSenderId: "623641197890",
       appId: "1:623641197890:web:6675b451e5c05a69319cdb",
       measurementId: "G-8NPR6RLHFZ"
     };
 
-    // Инициализация Firebase
-    firebase.initializeApp(firebaseConfig);
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    // Показать/скрыть дропдаун
-    function toggleDropdown() {
-      const menu = document.getElementById("dropdown");
-      menu.style.display = menu.style.display === "flex" ? "none" : "flex";
-    }
+    function register() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
 
-    // Войти через Google
-    function signIn() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider)
-        .then(result => {
-          const user = result.user;
-          alert(`Добро пожаловать, ${user.displayName}!`);
-          // здесь можно показать фото, имя и т.д.
+      auth.createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          user.sendEmailVerification().then(() => {
+            document.getElementById("registerStatus").innerText =
+              "✅ Проверка отправлена. Проверь email!";
+          });
         })
-        .catch(error => {
-          console.error(error);
-          alert("Ошибка входа");
+        .catch((error) => {
+          document.getElementById("registerStatus").innerText =
+            "❌ Ошибка: " + error.message;
         });
     }
   </script>
+</head>
+
+<body>
+  <div id="registerForm">
+    <h2 style="text-align: center;">Регистрация</h2>
+    <input type="text" id="username" placeholder="Имя пользователя (пока не сохраняется)" />
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Пароль" />
+    <button onclick="register()">Зарегистрироваться</button>
+    <p id="registerStatus"></p>
+  </div>
 </body>
 </html>
-
