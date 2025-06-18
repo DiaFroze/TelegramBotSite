@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Мой WebApp</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <h2>Привет из WebApp!</h2>
+  <input type="text" id="messageInput" placeholder="Напиши что-нибудь" />
+  <button onclick="sendMessage()">Отправить в бота</button>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    function sendMessage() {
+      const input = document.getElementById("messageInput").value;
+      tg.sendData(input); // Отправка в бота
+    }
+  </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Лавовый дождь</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #000; /* черный фон */
+      overflow: hidden;
+      height: 100%;
+    }
+
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="lavaRain"></canvas>
+
+  <script>
+    const canvas = document.getElementById("lavaRain");
+    const ctx = canvas.getContext("2d");
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    const drops = [];
+
+    for (let i = 0; i < 300; i++) {
+      drops.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        speed: 2 + Math.random() * 3,
+        length: 10 + Math.random() * 20,
+        color: `rgba(${200 + Math.random()*55}, ${20 + Math.random()*30}, 0, 0.8)`
+      });
+    }
+
+    function draw() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+      ctx.fillRect(0, 0, width, height);
+
+      for (let drop of drops) {
+        ctx.beginPath();
+        ctx.strokeStyle = drop.color;
+        ctx.lineWidth = 2;
+        ctx.moveTo(drop.x, drop.y);
+        ctx.lineTo(drop.x, drop.y + drop.length);
+        ctx.stroke();
+
+        drop.y += drop.speed;
+
+        if (drop.y > height) {
+          drop.y = -drop.length;
+          drop.x = Math.random() * width;
+        }
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+
+    window.addEventListener("resize", () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+  </script>
+</body>
+</html>
